@@ -65,14 +65,47 @@ class newWindow:
         self.canvas.image=self.image
         self.canvas.create_image(0,0,anchor=NW,image=self.image)
         self.downloadPath=StringVar()
+        optionmenu_var = StringVar(value=self.HighResVid.resolution)  # set initial value
+
+        def optionmenu_callback(choice):
+            self.HighResVid=self.video.streams.filter(resolution=choice).first()
+            self.label.configure(text=f"Video Size: {round(int(self.HighResVid.filesize)*0.000001, 2)} MB\n"
+                            f"Audio Size: {round(int(self.audio.filesize)*0.000001, 2)} MB\n")
+
+        combobox = CTkOptionMenu(master=self.canvas,
+                                            values=[self.HighResVid.resolution],
+                                            command=optionmenu_callback,
+                                            variable=optionmenu_var,
+                                            corner_radius=1,
+                                            bg_color="transparent",
+                                            dropdown_text_color="yellow",
+                                            text_color="yellow",
+                                            width=5
+                                            )
+        combobox.place(relx=0.75,rely=0.85)
+        
+        try:
+            vids=[self.video.streams.get_by_resolution("1080p"),self.video.streams.get_by_resolution("720p"),self.video.streams.get_by_resolution("480p"),self.video.streams.get_by_resolution("360p"),self.video.streams.get_by_resolution("144p")]
+            vidsRes=[]
+
+            for x in vids:
+                if x == None:
+                    vids.remove(x)
+                    
+            for x in vids:
+                vidsRes.append(x.resolution)
+
+            combobox.configure(values=vidsRes)
+        except:
+             self.HighResVid=self.video.streams.get_highest_resolution()
+
         self.label=CTkLabel(master=self.root,
                         width=75,
                         height=10,
                         corner_radius=8,
                         bg_color="transparent",
                         text=f"Video Size: {round(int(self.HighResVid.filesize)*0.000001, 2)} MB\n"
-                            f"Audio Size: {round(int(self.audio.filesize)*0.000001, 2)} MB\n"
-                            f"Video Resolution: {self.HighResVid.resolution}")
+                            f"Audio Size: {round(int(self.audio.filesize)*0.000001, 2)} MB\n")
         self.label.pack()
 
         self.ent1=CTkEntry(master=self.root,
